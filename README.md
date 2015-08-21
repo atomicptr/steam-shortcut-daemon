@@ -19,6 +19,10 @@ This application fixes that problem.
 * [j201/windows-shortcuts](https://github.com/j201/windows-shortcuts)
 * [shortcut.exe by Optimum X](http://www.optimumx.com/downloads.html)
 
+## Icon Attribution
+
+The icon was made by [Martz90](http://www.iconarchive.com/show/hex-icons-by-martz90/steam-icon.html)
+
 ## License
 
 MIT

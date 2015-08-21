@@ -1,4 +1,7 @@
 var app = require("app");
+var Menu = require('menu');
+var Tray = require('tray');
+
 var fs = require("fs");
 var path = require("path");
 
@@ -101,6 +104,9 @@ function checkForChanges() {
     });
 }
 
+var tray = null;
+var trayMenu = null;
+
 app.on("ready", function() {
     var steamShortcutFolder = getSteamShortcutFolder();
 
@@ -115,5 +121,23 @@ app.on("ready", function() {
         if(event == "rename") {
             checkForChanges();
         }
-    })
+    });
+
+    // create a tray menu
+    console.log("create the tray menu");
+    tray = new Tray(__dirname + "/icons/icon.png");
+
+    var trayMenu = Menu.buildFromTemplate([
+        {
+            label: "Quit",
+            type: "normal",
+            click: function() {
+                fs.unwatchFile(steamShortcutFolder);
+                app.quit();
+            }
+        }
+    ]);
+
+    tray.setToolTip("Steam Shortcut Daemon");
+    tray.setContextMenu(trayMenu);
 });
