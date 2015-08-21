@@ -4,7 +4,7 @@ A daemon which watches the Start Menu folder of Steam and adds Windows 10 compat
 
 ## Download
 
-Coming soon...
+[Download the latest version here](https://github.com/kasoki/steam-shortcut-daemon/releases/latest)
 
 ## Why?
 
