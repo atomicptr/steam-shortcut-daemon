@@ -10,8 +10,15 @@ var ini = require("./vendor/ini.js");
 
 var packageJson = require("./package.json");
 
+var squirrel = require("./squirrel.js");
+
 if(process.platform != "win32") {
-    console.error("steam-shortcut-daemon only makes sense with Windows, derp");
+    console.error(packageJson.name + " only makes sense with Windows, derp");
+    app.quit();
+    return;
+}
+
+if(squirrel.handleEvents(process.argv)) {
     app.quit();
     return;
 }
