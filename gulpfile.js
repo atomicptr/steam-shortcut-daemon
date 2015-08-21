@@ -7,7 +7,7 @@ var packageJson = require("./app/package.json");
 var path = require("path");
 
 var configs = {
-    ELECTRON_VERSION: "v0.30.4",
+    ELECTRON_VERSION: "v0.31.0",
     PRODUCT_NAME: packageJson.productName,
     APP_NAME: packageJson.name,
     APP_VERSION: packageJson.version,
@@ -38,7 +38,7 @@ gulp.task("build", function() {
         cache: "./cache",
         version: configs.ELECTRON_VERSION,
         packaging: false,
-        asar: true,
+        asar: false,
         platforms: ["win32-x64"],
         platformResources: {
             win: {

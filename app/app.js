@@ -9,8 +9,9 @@ var shortcuts = require("./vendor/windows-shortcuts.js");
 var ini = require("./vendor/ini.js");
 
 if(process.platform != "win32") {
-    throw "steam-shortcut-daemon only makes sense with Windows, derp";
+    console.error("steam-shortcut-daemon only makes sense with Windows, derp");
     app.quit();
+    return;
 }
 
 function getSteamShortcutFolder() {
@@ -27,8 +28,8 @@ function createShortcutToUrl(path, url, icon) {
         iconIndex: icon.index
     }
 
-    shortcuts.create(path, target, function(error) {
-        if(error) {
+    shortcuts.create(path, target, function(err) {
+        if(err) {
             throw err;
         }
     });
@@ -125,7 +126,8 @@ app.on("ready", function() {
 
     // create a tray menu
     console.log("create the tray menu");
-    tray = new Tray(__dirname + "/icons/icon.png");
+    tray = new Tray(path.resolve(__dirname, "icons", "icon.png"));
+    console.log(path.resolve(__dirname, "icons", "icon.png"));
 
     var trayMenu = Menu.buildFromTemplate([
         {
