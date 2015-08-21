@@ -25,9 +25,9 @@ gulp.task("copy-shortcut-exe", function(folder) {
 
     var fs = require("fs");
 
-    fs.mkdirSync(shortcutExeTarget);
-
-    return gulp.src("app/vendor/shortcut.exe").pipe(gulp.dest(shortcutExeTarget));
+    fs.mkdir(shortcutExeTarget, function() {
+        gulp.src("app/vendor/shortcut.exe").pipe(gulp.dest(shortcutExeTarget));
+    });
 });
 
 gulp.task("build", function() {

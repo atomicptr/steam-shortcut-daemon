@@ -127,7 +127,6 @@ app.on("ready", function() {
     // create a tray menu
     console.log("create the tray menu");
     tray = new Tray(path.resolve(__dirname, "icons", "icon.png"));
-    console.log(path.resolve(__dirname, "icons", "icon.png"));
 
     var trayMenu = Menu.buildFromTemplate([
         {
@@ -142,4 +141,24 @@ app.on("ready", function() {
 
     tray.setToolTip("Steam Shortcut Daemon");
     tray.setContextMenu(trayMenu);
+
+    // add steam shortcut exe to start-up folder
+    var exeName = path.basename(process.execPath);
+
+    if(exeName.startsWith("steam-shortcut-daemon")) {
+        var lnk = path.resolve(process.env["appdata"], "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "SteamShortcutDaemon.lnk");
+
+        fs.exists(lnk, function(exists) {
+            if(!exists) {
+                console.log("Start menu shortcut doesn't exists -> create one...");
+
+                shortcuts.create(lnk, process.execPath);
+            }
+        });
+    }
+
+    app.on("close", function() {
+        tray = null;
+        trayMenu = null;
+    });
 });
