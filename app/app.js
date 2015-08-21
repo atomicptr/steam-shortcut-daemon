@@ -8,6 +8,8 @@ var path = require("path");
 var shortcuts = require("./vendor/windows-shortcuts.js");
 var ini = require("./vendor/ini.js");
 
+var packageJson = require("./package.json");
+
 if(process.platform != "win32") {
     console.error("steam-shortcut-daemon only makes sense with Windows, derp");
     app.quit();
@@ -145,8 +147,8 @@ app.on("ready", function() {
     // add steam shortcut exe to start-up folder
     var exeName = path.basename(process.execPath);
 
-    if(exeName.startsWith("steam-shortcut-daemon")) {
-        var lnk = path.resolve(process.env["appdata"], "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "SteamShortcutDaemon.lnk");
+    if(exeName.startsWith(packageJson.name)) {
+        var lnk = path.resolve(process.env["appdata"], "Microsoft", "Windows", "Start Menu", "Programs", "Startup", packageJson.name + ".lnk");
 
         fs.exists(lnk, function(exists) {
             if(!exists) {
