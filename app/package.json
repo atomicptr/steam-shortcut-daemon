@@ -1,0 +1,6 @@
+{
+    "name": "steam-shortcut-daemon",
+    "productName": "SteamShortcutDaemon",
+    "version": "0.0.1",
+    "main": "app.js"
+}
