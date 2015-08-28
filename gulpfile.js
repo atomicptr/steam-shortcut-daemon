@@ -20,16 +20,6 @@ gulp.task("run", function() {
     gulp.src("app").pipe(run([], {}));
 });
 
-gulp.task("copy-shortcut-exe", function(folder) {
-    var shortcutExeTarget = path.resolve(__dirname, "build", configs.ELECTRON_VERSION, "win32-x64", "vendor");
-
-    var fs = require("fs");
-
-    fs.mkdir(shortcutExeTarget, function() {
-        gulp.src("app/vendor/shortcut.exe").pipe(gulp.dest(shortcutExeTarget));
-    });
-});
-
 gulp.task("build", function() {
     var packagerOptions = {
         dir: path.resolve(__dirname, "app"),
@@ -40,7 +30,7 @@ gulp.task("build", function() {
         version: configs.ELECTRON_VERSION,
         icon: path.resolve(__dirname, "app", "icons", "icon.ico"),
         cache: path.resolve(__dirname, "cache"),
-        asar: true,
+        asar: false,
         overwrite: true,
         "app-version": configs.APP_VERSION,
 
@@ -66,8 +56,6 @@ gulp.task("build", function() {
         exec("explorer.exe " + appPath);
     });
 });
-
-gulp.task("package", ["build", "copy-shortcut-exe"]);
 
 gulp.task("build-installer", [], function(done) {
     windowsInstaller({

@@ -1,7 +1,7 @@
 {
     "name": "SteamShortcutDaemon",
     "productName": "SteamShortcutDaemon",
-    "description": "A daemon which creates Windows 10 compatible shortcuts for your Steam games!",
-    "version": "0.1.1",
+    "description": "Steam Shortcut Daemon",
+    "version": "0.1.2",
     "main": "app.js"
 }
