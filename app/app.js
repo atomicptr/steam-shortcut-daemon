@@ -10,7 +10,7 @@ var ini = require("./vendor/ini.js");
 
 var packageJson = require("./package.json");
 
-var squirrel = require("./squirrel.js");
+var quirl = require("./vendor/quirl.js").init();
 
 if(process.platform != "win32") {
     console.error(packageJson.name + " only makes sense with Windows, derp");
@@ -18,7 +18,10 @@ if(process.platform != "win32") {
     return;
 }
 
-if(squirrel.handleEvents(process.argv)) {
+quirl.on("install", function() {
+});
+
+if(quirl.handleEvents(process.argv)) {
     app.quit();
     return;
 }
