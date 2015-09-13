@@ -150,6 +150,9 @@ var tray = null;
 var trayMenu = null;
 
 app.on("ready", function() {
+    // HACK: fixes the tray icon problem
+    app.setName(packageJson.name + Math.random(1, 1000));
+
     var steamShortcutFolder = getSteamShortcutFolder();
 
     // check for changes once at startup

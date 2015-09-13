@@ -2,6 +2,6 @@
     "name": "SteamShortcutDaemon",
     "productName": "SteamShortcutDaemon",
     "description": "Steam Shortcut Daemon",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "main": "app.js"
 }
