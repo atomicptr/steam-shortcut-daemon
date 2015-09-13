@@ -55,6 +55,42 @@ function createShortcutToUrl(path, url, icon) {
     });
 }
 
+function updateShortcutToUrl(path, url, icon) {
+    var target = {
+        target: "%WINDIR%/explorer.exe",
+        args: url,
+        icon: icon.file,
+        iconIndex: icon.index
+    }
+
+    shortcuts.edit(path, target, function(err) {
+        if(err) {
+            throw err;
+        }
+    });
+}
+
+function readUrl(path, callback) {
+    fs.readFile(path, function(err, data) {
+        if(err) {
+            throw err;
+        }
+
+        var content = data.toString();
+
+        var game = ini.parse(content);
+
+        var url = game.InternetShortcut.URL;
+
+        var icon = {
+            file: game.InternetShortcut.IconFile,
+            index: game.InternetShortcut.IconIndex
+        };
+
+        callback(url, icon);
+    });
+}
+
 function checkForChanges() {
     var steamShortcutFolder = getSteamShortcutFolder();
 
@@ -98,22 +134,7 @@ function checkForChanges() {
                         console.log(lnkPath + " does not exist...");
                         console.log("reading... " + urlPath);
 
-                        var data = fs.readFile(urlPath, function(err, data) {
-                            if(err) {
-                                throw err;
-                            }
-
-                            var content = data.toString();
-
-                            var game = ini.parse(content);
-
-                            var url = game.InternetShortcut.URL;
-
-                            var icon = {
-                                file: game.InternetShortcut.IconFile,
-                                index: game.InternetShortcut.IconIndex
-                            };
-
+                        readUrl(urlPath, function(url, icon) {
                             createShortcutToUrl(lnkPath, url, icon);
 
                             console.log("created shortcut for " + path.basename(lnkPath, ".lnk"));
@@ -141,6 +162,21 @@ app.on("ready", function() {
         // this will be called whenever a file is added or removed
         if(event == "rename") {
             checkForChanges();
+        } else if(event == "change" && filename.endsWith(".url")) {
+            // an .url file changed, update the lnk file
+            var urlPath = path.resolve(steamShortcutFolder, filename);
+            var lnkPath = path.resolve(steamShortcutFolder, path.basename(filename, ".url") + ".lnk");
+
+            fs.exists(lnkPath, function(exists) {
+                if(exists) {
+                    readUrl(urlPath, function(url, icon) {
+                        updateShortcutToUrl(lnkPath, url, icon);
+
+                        console.log("updated shortcut for " + filename);
+                    });
+                }
+            });
+
         }
     });
 
