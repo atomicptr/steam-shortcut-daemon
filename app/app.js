@@ -19,6 +19,14 @@ if(process.platform != "win32") {
 }
 
 quirl.on("install", function() {
+    var startupPath = path.resolve(process.env["appdata"], "Microsoft", "Windows", "Start Menu", "Programs", "Startup", packageJson.name + ".lnk");
+
+    var exists = fs.existsSync(startupPath);
+
+    if(exists) {
+        console.log("old startup file found, removing it...");
+        fs.unlinkSync(startupPath);
+    }
 });
 
 if(quirl.handleEvents(process.argv)) {
