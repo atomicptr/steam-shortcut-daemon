@@ -278,7 +278,9 @@ app.on("ready", function() {
     }
 
     // check if there is an updated version of SteamShortcutDaemon available.
-    checkForUpdate();
+    checkForUpdate(function() {
+        console.log("done - check for updates");
+    });
 
     app.on("close", function() {
         tray = null;
