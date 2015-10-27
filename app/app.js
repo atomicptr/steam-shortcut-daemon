@@ -4,6 +4,7 @@ var Tray = require('tray');
 
 var fs = require("fs");
 var path = require("path");
+var spawn = require("child_process").spawn;
 
 var shortcuts = require("./vendor/windows-shortcuts.js");
 var ini = require("./vendor/ini.js");
@@ -18,6 +19,32 @@ if(process.platform != "win32") {
     return;
 }
 
+function runSquirrel(args, callback) {
+    var updateDotExe = path.resolve(process.execPath, "..", "..", "Update.exe");
+
+    fs.exists(updateDotExe, function(fileExists) {
+        if(fileExists) {
+            var update = spawn(updateDotExe, args);
+
+            update.stdout.on("data", function(data) {
+                console.log("Squirrel [" + args.join(",") + "]: " + data.toString());
+            });
+
+            update.stderr.on("data", function(data) {
+                console.error("Squirrel Error [" + args.join(",") + "]: " + data.toString());
+            });
+
+            update.on("close", callback);
+        } else {
+            console.warn("Update.exe not found, assuming this is a development or portable build. Updating won't work with this!");
+        }
+    });
+}
+
+function checkForUpdate(callback) {
+    runSquirrel(["--update", packageJson.updateUrl], callback);
+}
+
 quirl.on("install", function() {
     var startupPath = path.resolve(process.env["appdata"], "Microsoft", "Windows", "Start Menu", "Programs", "Startup", packageJson.name + ".lnk");
 
@@ -27,10 +54,23 @@ quirl.on("install", function() {
         console.log("old startup file found, removing it...");
         fs.unlinkSync(startupPath);
     }
+
+    app.quit();
+});
+
+quirl.on("uninstall", function() {
+    app.quit();
+});
+
+quirl.on("update", function() {
+    app.quit();
+});
+
+quirl.on("obsolete", function() {
+    app.quit();
 });
 
 if(quirl.handleEvents(process.argv)) {
-    app.quit();
     return;
 }
 
@@ -189,6 +229,27 @@ app.on("ready", function() {
 
     var trayMenu = Menu.buildFromTemplate([
         {
+            label: "About",
+            type: "normal",
+            click: function() {
+                spawn("explorer.exe", ["http://steam-shortcut-daemon.kasoki.de"]);
+            }
+        },
+        {
+            label: "Donate",
+            type: "normal",
+            click: function() {
+                spawn("explorer.exe", ["http://donate.kasoki.de"]);
+            }
+        },
+        {
+            label: "App Version: " + packageJson.version,
+            type: "normal"
+        },
+        {
+            type: "separator"
+        },
+        {
             label: "Quit",
             type: "normal",
             click: function() {
@@ -215,6 +276,9 @@ app.on("ready", function() {
             }
         });
     }
+
+    // check if there is an updated version of SteamShortcutDaemon available.
+    checkForUpdate();
 
     app.on("close", function() {
         tray = null;

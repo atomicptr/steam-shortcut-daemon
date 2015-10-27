@@ -1,0 +1,35 @@
+environment:
+    nodejs_version: "0.12"
+
+install:
+    - ps: Install-Product node $env:nodejs_version
+    - npm install
+    - npm install -g gulp
+
+build_script: gulp build
+after_build:
+    - gulp build-installer
+    - 7z a -r SteamShortcutDaemon.zip %APPVEYOR_BUILD_FOLDER%\build\SteamShortcutDaemon-win32-x64
+
+artifacts:
+    - path: installer/*.nupkg
+      name: nupkgs
+    - path: installer/RELEASES
+      name: release
+    - path: installer/SteamShortcutDaemonSetup.exe
+      name: setup
+    - path: SteamShortcutDaemon.zip
+      name: zip
+
+deploy:
+    provider: GitHub
+    auth_token:
+        secure: f7QlBS6SLKMoNYdRaZqlnvytqri/U0wdau9ngqiCQ/i0Xvdf5d7f3ENpYvc7lK+f
+
+    artifact: nupkgs, release, setup, zip
+
+    description: "changelog coming soon..."
+    draft: true
+    prerelease: false
+    on:
+        appveyor_repo_tag: true
