@@ -45,7 +45,7 @@ function checkForUpdate(callback) {
     runSquirrel(["--update", packageJson.updateUrl], callback);
 }
 
-quirl.on("install", function() {
+function removeOldShortcuts() {
     var startupPath = path.resolve(process.env["appdata"], "Microsoft", "Windows", "Start Menu", "Programs", "Startup", packageJson.name + ".lnk");
 
     var exists = fs.existsSync(startupPath);
@@ -54,15 +54,20 @@ quirl.on("install", function() {
         console.log("old startup file found, removing it...");
         fs.unlinkSync(startupPath);
     }
+}
 
+quirl.on("install", function() {
+    removeOldShortcuts();
     app.quit();
 });
 
 quirl.on("uninstall", function() {
+    removeOldShortcuts();
     app.quit();
 });
 
 quirl.on("update", function() {
+    removeOldShortcuts();
     app.quit();
 });
 
