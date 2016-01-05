@@ -139,54 +139,61 @@ function readUrl(path, callback) {
 function checkForChanges() {
     var steamShortcutFolder = getSteamShortcutFolder();
 
-    // read all files in steam shortcut directory
-    fs.readdir(steamShortcutFolder, function(err, files) {
-        if(err) {
+    // try to create the directory if it doesn't exist (happens if the user hasn't used any start menu shortcuts until now)
+    fs.mkdir(steamShortcutFolder, function(err) {
+        if(err && err.code != "EEXIST") { // throws the EEXIST error when the directory already exists, means you can ignore that 99% of the time
             throw err;
         }
 
-        // check if .lnk file already exists
-        files.forEach(function(file) {
-            var basename = path.basename(file);
-
-            // found a lnk file, check if the url file still exists, if not delete the .lnk file
-            // because this means the user has deleted the game already :)
-            if(basename.endsWith(".lnk")) {
-                var lnkPath = path.resolve(steamShortcutFolder, file);
-                var urlPath = path.resolve(steamShortcutFolder, path.basename(file, ".lnk") + ".url");
-
-                fs.exists(urlPath, function(fileExists) {
-                    if(!fileExists) {
-                        fs.unlink(lnkPath, function(err) {
-                            if(err) {
-                                throw err;
-                            } else {
-                                console.log("deleted " + lnkPath);
-                            }
-                        });
-                    }
-                });
+        // read all files in steam shortcut directory
+        fs.readdir(steamShortcutFolder, function(err, files) {
+            if(err) {
+                throw err;
             }
 
-            // found a .url file
-            if(basename.endsWith(".url")) {
-                var urlPath = path.resolve(steamShortcutFolder, file);
-                var lnkPath = path.resolve(steamShortcutFolder, path.basename(file, ".url") + ".lnk");
+            // check if .lnk file already exists
+            files.forEach(function(file) {
+                var basename = path.basename(file);
 
-                fs.exists(lnkPath, function(fileExists) {
-                    // no .lnk here, create one
-                    if(!fileExists) {
-                        console.log(lnkPath + " does not exist...");
-                        console.log("reading... " + urlPath);
+                // found a lnk file, check if the url file still exists, if not delete the .lnk file
+                // because this means the user has deleted the game already :)
+                if(basename.endsWith(".lnk")) {
+                    var lnkPath = path.resolve(steamShortcutFolder, file);
+                    var urlPath = path.resolve(steamShortcutFolder, path.basename(file, ".lnk") + ".url");
 
-                        readUrl(urlPath, function(url, icon) {
-                            createShortcutToUrl(lnkPath, url, icon);
+                    fs.exists(urlPath, function(fileExists) {
+                        if(!fileExists) {
+                            fs.unlink(lnkPath, function(err) {
+                                if(err) {
+                                    throw err;
+                                } else {
+                                    console.log("deleted " + lnkPath);
+                                }
+                            });
+                        }
+                    });
+                }
 
-                            console.log("created shortcut for " + path.basename(lnkPath, ".lnk"));
-                        });
-                    }
-                });
-            }
+                // found a .url file
+                if(basename.endsWith(".url")) {
+                    var urlPath = path.resolve(steamShortcutFolder, file);
+                    var lnkPath = path.resolve(steamShortcutFolder, path.basename(file, ".url") + ".lnk");
+
+                    fs.exists(lnkPath, function(fileExists) {
+                        // no .lnk here, create one
+                        if(!fileExists) {
+                            console.log(lnkPath + " does not exist...");
+                            console.log("reading... " + urlPath);
+
+                            readUrl(urlPath, function(url, icon) {
+                                createShortcutToUrl(lnkPath, url, icon);
+
+                                console.log("created shortcut for " + path.basename(lnkPath, ".lnk"));
+                            });
+                        }
+                    });
+                }
+            });
         });
     });
 }
@@ -224,7 +231,6 @@ app.on("ready", function() {
                     });
                 }
             });
-
         }
     });
 
