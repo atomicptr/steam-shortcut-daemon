@@ -2,7 +2,7 @@
     "name": "SteamShortcutDaemon",
     "productName": "SteamShortcutDaemon",
     "description": "Steam Shortcut Daemon",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "electronVersion": "0.34.1",
     "main": "app.js",
     "updateUrl": "http://updates.kasoki.de/app/steamshortcutdaemon"
