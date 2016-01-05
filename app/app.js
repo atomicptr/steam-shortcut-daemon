@@ -67,7 +67,6 @@ quirl.on("uninstall", function() {
 });
 
 quirl.on("update", function() {
-    removeOldShortcuts();
     app.quit();
 });
 
