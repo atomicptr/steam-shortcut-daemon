@@ -124,6 +124,11 @@ function readUrl(path, callback) {
 
         var game = ini.parse(content);
 
+        if(!game.InternetShortcut) {
+            console.error("Couldn't read URL for path: " + path);
+            return;
+        }
+
         var url = game.InternetShortcut.URL;
 
         var icon = {

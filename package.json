@@ -1,9 +1,9 @@
 {
     "name": "steam-shortcut-daemon",
     "dependencies": {
-        "electron-packager": "^5.1.0",
-        "electron-windows-installer": "^1.1.0",
-        "gulp": "^3.9.0",
-        "gulp-run-electron": "^1.2.1"
+        "electron-packager": "*",
+        "electron-windows-installer": "*",
+        "gulp": "*",
+        "gulp-run-electron": "*"
   }
 }
