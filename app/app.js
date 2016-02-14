@@ -8,13 +8,42 @@ var spawn = require("child_process").spawn;
 
 var shortcuts = require("./vendor/windows-shortcuts.js");
 var ini = require("./vendor/ini.js");
+var Logger = require("./vendor/juicy-log.js");
 
 var packageJson = require("./package.json");
 
 var quirl = require("./vendor/quirl.js").init();
 
+var juicy = new Logger();
+
+// log to console
+juicy.add(function(type, message, time) {
+    var pad = function(num) {
+        return num < 10 ? "0" + num : num;
+    }
+
+    var messageToPrint = "[" + pad(time.getHours()) + ":" + pad(time.getMinutes()) + "] " + message;
+
+    switch(type) {
+        case Logger.type.WARNING: console.warn(messageToPrint); break;
+        case Logger.type.ERROR: console.error(messageToPrint); break;
+        default: console.log(messageToPrint); break;
+    }
+});
+
+// log to file
+juicy.add(function(type, message, time) {
+    var appdata = process.env["appdata"];
+
+    fs.appendFile(path.resolve(appdata, "SteamShortcutDaemon", "SteamShortcutDaemon.log"), "[" + time.getTime() + "] " + message + "\r\n", function(err) {
+        if(err) {
+            throw err;
+        }
+    });
+});
+
 if(process.platform != "win32") {
-    console.error(packageJson.name + " only makes sense with Windows, derp");
+    juicy.error(packageJson.name + " only makes sense with Windows, derp");
     app.quit();
     return;
 }
@@ -27,16 +56,16 @@ function runSquirrel(args, callback) {
             var update = spawn(updateDotExe, args);
 
             update.stdout.on("data", function(data) {
-                console.log("Squirrel [" + args.join(",") + "]: " + data.toString());
+                juicy.log("Squirrel [" + args.join(",") + "]: " + data.toString());
             });
 
             update.stderr.on("data", function(data) {
-                console.error("Squirrel Error [" + args.join(",") + "]: " + data.toString());
+                juicy.error("Squirrel Error [" + args.join(",") + "]: " + data.toString());
             });
 
             update.on("close", callback);
         } else {
-            console.warn("Update.exe not found, assuming this is a development or portable build. Updating won't work with this!");
+            juicy.warn("Update.exe not found, assuming this is a development or portable build. Updating won't work with this!");
         }
     });
 }
@@ -51,7 +80,7 @@ function removeOldShortcuts() {
     var exists = fs.existsSync(startupPath);
 
     if(exists) {
-        console.log("old startup file found, removing it...");
+        juicy.log("old startup file found, removing it...");
         fs.unlinkSync(startupPath);
     }
 }
@@ -126,7 +155,7 @@ function readUrl(path, callback) {
         var game = ini.parse(content);
 
         if(!game.InternetShortcut) {
-            console.error("Couldn't read URL for path: " + path);
+            juicy.error("Couldn't read URL for path: " + path);
             return;
         }
 
@@ -172,7 +201,7 @@ function checkForChanges() {
                                 if(err) {
                                     throw err;
                                 } else {
-                                    console.log("deleted " + lnkPath);
+                                    juicy.log("deleted " + lnkPath);
                                 }
                             });
                         }
@@ -187,13 +216,13 @@ function checkForChanges() {
                     fs.exists(lnkPath, function(fileExists) {
                         // no .lnk here, create one
                         if(!fileExists) {
-                            console.log(lnkPath + " does not exist...");
-                            console.log("reading... " + urlPath);
+                            juicy.log(lnkPath + " does not exist...");
+                            juicy.log("reading... " + urlPath);
 
                             readUrl(urlPath, function(url, icon) {
                                 createShortcutToUrl(lnkPath, url, icon);
 
-                                console.log("created shortcut for " + path.basename(lnkPath, ".lnk"));
+                                juicy.log("created shortcut for " + path.basename(lnkPath, ".lnk"));
                             });
                         }
                     });
@@ -215,9 +244,9 @@ app.on("ready", function() {
     // check for changes once at startup
     checkForChanges();
 
-    console.log("watching " + steamShortcutFolder + " for changes...");
+    juicy.log("watching " + steamShortcutFolder + " for changes...");
     fs.watch(steamShortcutFolder, function(event, filename) {
-        console.log("event: " + event + " from file: " + filename);
+        juicy.log("event: " + event + " from file: " + filename);
 
         // this will be called whenever a file is added or removed
         if(event == "rename") {
@@ -232,7 +261,7 @@ app.on("ready", function() {
                     readUrl(urlPath, function(url, icon) {
                         updateShortcutToUrl(lnkPath, url, icon);
 
-                        console.log("updated shortcut for " + filename);
+                        juicy.log("updated shortcut for " + filename);
                     });
                 }
             });
@@ -240,7 +269,7 @@ app.on("ready", function() {
     });
 
     // create a tray menu
-    console.log("create the tray menu");
+    juicy.log("create the tray menu");
     tray = new Tray(path.resolve(__dirname, "icons", "icon.png"));
 
     var trayMenu = Menu.buildFromTemplate([
@@ -286,18 +315,16 @@ app.on("ready", function() {
 
         fs.exists(lnk, function(exists) {
             if(!exists) {
-                console.log("Start menu shortcut doesn't exists -> create one...");
+                juicy.log("Start menu shortcut doesn't exists -> create one...");
 
-                var exePath = path.resolve(process.execPath, "..", "..", "Update.exe") + " -processStart " + packageJson.name + ".exe";
-
-                shortcuts.create(lnk, exePath);
+                shortcuts.create(lnk, process.execPath);
             }
         });
     }
 
     // check if there is an updated version of SteamShortcutDaemon available.
     checkForUpdate(function() {
-        console.log("done - check for updates");
+        juicy.log("done - check for updates");
     });
 
     app.on("close", function() {
