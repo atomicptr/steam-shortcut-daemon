@@ -71,6 +71,7 @@ quirl.on("update", function() {
 });
 
 quirl.on("obsolete", function() {
+    removeOldShortcuts();
     app.quit();
 });
 
@@ -287,7 +288,9 @@ app.on("ready", function() {
             if(!exists) {
                 console.log("Start menu shortcut doesn't exists -> create one...");
 
-                shortcuts.create(lnk, process.execPath);
+                var exePath = path.resolve(process.execPath, "..", "..", "Update.exe") + " -processStart " + packageJson.name + ".exe";
+
+                shortcuts.create(lnk, exePath);
             }
         });
     }
